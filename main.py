@@ -25,6 +25,14 @@ goal_x = 0
 goal_y = 0
 canvas = None
 
+# Search pattern menu bar
+pattern_frame = tk.Frame(root)
+pattern_frame.pack(side=tk.BOTTOM, pady=10)
+tk.Label(pattern_frame, text="Select Search Pattern:").pack(side=tk.LEFT, padx=5)
+search_pattern_var = tk.StringVar(value="Lawnmower")
+pattern_menu = tk.OptionMenu(pattern_frame, search_pattern_var, "Lawnmower")
+pattern_menu.pack(side=tk.LEFT, padx=5)
+
 # Create legend to show which dot is drone, target, or obstacle
 legend_frame = tk.Frame(root)
 legend_frame.pack(side=tk.TOP, pady=10)
