@@ -2,7 +2,7 @@ import tkinter as tk
 from drone import Drone
 
 
-def create_grid(root, goal_x, goal_y):
+def create_grid(root, goal_x = None, goal_y = None):
 
     # Define grid size
     rows, cols = 20, 20
@@ -70,27 +70,22 @@ def create_grid(root, goal_x, goal_y):
     # draw the drone
     radius = 6
 
-    canvas.create_oval(
-        center_x - radius,
-        center_y - radius,
-        center_x + radius,
-        center_y + radius,
-        fill="blue"
-    )
+    drone = canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill="blue")
 
     # calculate the goal position
-    goal_center_x = left_margin + goal_x * cell_size + cell_size / 2
-    goal_center_y = (rows - 1 - goal_y) * cell_size + cell_size / 2
+    if goal_x is not None and goal_y is not None:
+        goal_center_x = left_margin + goal_x * cell_size + cell_size / 2
+        goal_center_y = (rows - 1 - goal_y) * cell_size + cell_size / 2
 
-    # draw the goal
-    goal_radius = 7
+        # draw the goal
+        goal_radius = 7
 
-    canvas.create_oval(
-        goal_center_x - goal_radius,
-        goal_center_y - goal_radius,
-        goal_center_x + goal_radius,
-        goal_center_y + goal_radius,
-        fill="red"
-    )
+        canvas.create_oval(
+            goal_center_x - goal_radius,
+            goal_center_y - goal_radius,
+            goal_center_x + goal_radius,
+            goal_center_y + goal_radius,
+            fill="red"
+        )
 
-    return canvas
+    return canvas, drone
