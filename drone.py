@@ -20,3 +20,8 @@ class Drone:
     def move_right(self):
         if self.row < self.cols - 1:
             self.row += 1
+    
+    def move_to(x, y):
+        if 0 <= x < self.cols and 0 <= y < self.rows:
+            self.x = x
+            self.y = y
