@@ -2,11 +2,8 @@ import tkinter as tk
 from drone import Drone
 
 
-def create_grid(root, goal_x = None, goal_y = None):
-
-    # Define grid size
-    rows, cols = 20, 20
-    cell_size = 25
+def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10):
+    cell_size = 25  # size of each cell in pixels
 
     # space for axis labels
     left_margin = 40
