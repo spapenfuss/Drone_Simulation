@@ -48,6 +48,11 @@ def move_drone():
     
     x, y = path[path_index]
 
+    # Check if drone has reached the goal
+    if x == goal_x and y == goal_y:
+        print("Drone has reached the goal!")
+        return
+
     cell_size = 25
     left_margin = 40
 

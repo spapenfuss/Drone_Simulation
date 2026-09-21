@@ -2,7 +2,7 @@ class Drone:
     def __init__(self, x, y, rows, cols):
         self.x = x
         self.y = y
-        self.ros = rows
+        self.rows = rows
         self.cols = cols
     
     def move_up(self):
@@ -21,7 +21,7 @@ class Drone:
         if self.row < self.cols - 1:
             self.row += 1
     
-    def move_to(x, y):
+    def move_to(self, x, y):
         if 0 <= x < self.cols and 0 <= y < self.rows:
             self.x = x
             self.y = y
