@@ -20,8 +20,7 @@ steps = 0
 
 def run_simulation():
     # Create the random goal point
-    global goal_x, goal_y, path, path_index, after_id, canvas, drone, target, grid_size, start_time, end_time, target_found
-
+    global goal_x, goal_y, path, path_index, after_id, canvas, drone, target, grid_size, start_time, end_time, target_found, steps, elapsed_time
     goal_x = random.randint(0, cols - 1)
     goal_y = random.randint(0, rows - 1)
     target = (goal_x, goal_y)
@@ -35,14 +34,22 @@ def run_simulation():
 
     path_index = 0
     after_id = None
+    steps = 0
 
     if canvas is not None:
         canvas.destroy()
 
-    canvas, drone = create_grid(root, goal_x, goal_y, rows, cols)
+    canvas, drone = create_grid(grid_frame, goal_x, goal_y, rows, cols)
     target_found = False
     end_time = 0.0
     start_time = time.perf_counter()
+
+    grid_size_label.config(text=f"Grid Size: {rows} x {cols}")
+    target_label.config(text=f"Target: ({goal_x}, {goal_y})")
+    steps_label.config(text="Steps: 0")
+    time_label.config(text="Elapsed Time: 0.00 s")
+    status_label.config(text="Status: Searching")
+
     move_drone()
 
 
@@ -58,26 +65,20 @@ def reset_simulation():
     if canvas is not None:
         canvas.destroy()
 
-    canvas, drone = create_grid(root, rows=rows, cols=cols)
-
+    canvas, drone = create_grid(grid_frame, rows=rows, cols=cols)
+    grid_size_label.config(text=f"Grid Size: {rows} x {cols}")
+    target_label.config(text="Target: None")
+    steps_label.config(text="Steps: 0")
+    time_label.config(text="Elapsed Time: 0.00 s")
+    status_label.config(text="Status: Ready")
 
 def move_drone():
-    global path_index, after_id, steps
-    steps = 0
+    global path_index, after_id, steps, target_found, end_time, elapsed_time
 
     if path_index >= len(path):
         return
     
     x, y = path[path_index]
-
-    # Check if drone has reached the goal
-    if x == goal_x and y == goal_y:
-        print("Drone has reached the goal!")
-        target_found = True
-        end_time = current_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        return
-
     cell_size = 25
     left_margin = 40
     center_x = left_margin + x * cell_size + cell_size / 2
@@ -86,6 +87,21 @@ def move_drone():
     canvas.coords(drone, center_x - radius, center_y - radius, center_x + radius, center_y + radius)
     steps += 1
     path_index += 1
+
+    elapsed_time = time.perf_counter() - start_time
+    steps_label.config(text=f"Steps: {steps}")
+    time_label.config(text=f"Elapsed Time: {elapsed_time:.2f} s")
+
+    # Check if drone has reached the goal
+    if x == goal_x and y == goal_y:
+        print("Drone has reached the goal!")
+        target_found = True
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        time_label.config(text=f"Elapsed Time: {elapsed_time:.2f} s")
+        status_label.config(text="Status: Target Found")
+        return
+    
     after_id = root.after(speed, move_drone)
 
 
@@ -122,6 +138,13 @@ root.title("Drone Simulation")
 title_label = tk.Label(root, text="Autonomous Drone Simulator", font=("Helvetica", 18, "bold"))
 title_label.pack(pady=10)
 
+# Grid frame to hold the canvas
+content_frame = tk.Frame(root)
+content_frame.pack(pady=5)
+
+grid_frame = tk.Frame(content_frame)
+grid_frame.pack(side=tk.LEFT, padx=10)
+
 goal_x = 0
 goal_y = 0
 canvas = None
@@ -129,6 +152,24 @@ drone = None
 path = []
 path_index = 0
 after_id = None
+
+# Data panel
+data_frame = tk.LabelFrame(content_frame, text="Simulation Data", padx=10, pady=10)
+data_frame.pack(side=tk.RIGHT, padx=10, fill=tk.Y)
+grid_size_label = tk.Label(data_frame, text="Grid Size: 10 x 10")
+grid_size_label.pack(anchor="w", pady=2)
+
+target_label = tk.Label(data_frame, text="Target: (0, 0)")
+target_label.pack(anchor="w", pady=2)
+
+steps_label = tk.Label(data_frame, text="Steps: 0")
+steps_label.pack(anchor="w", pady=2)
+
+time_label = tk.Label(data_frame, text="Elapsed Time: 0.00 s")
+time_label.pack(anchor="w", pady=2)
+
+status_label = tk.Label(data_frame, text="Status: Ready")
+status_label.pack(anchor="w", pady=2)
 
 # Settings
 pattern_frame = tk.LabelFrame(root, text="Settings", padx=10, pady=10)
