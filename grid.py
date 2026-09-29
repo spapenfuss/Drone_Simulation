@@ -2,7 +2,7 @@ import tkinter as tk
 from drone import Drone
 
 
-def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10):
+def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10, start_x = 0, start_y = 0):
     cell_size = 25  # size of each cell in pixels
 
     # space for axis labels
@@ -35,30 +35,17 @@ def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10):
     for x in range(cols):
         center_x = left_margin + x * cell_size + cell_size / 2
         center_y = rows * cell_size + 15
-
-        canvas.create_text(
-            center_x,
-            center_y,
-            text=str(x),
-            font=("Arial", 10),
-            fill="black"
-        )
+        canvas.create_text(center_x, center_y, text=str(x), font=("Arial", 10), fill="black")
 
     # Label the y-axis
     for y in range(rows):
         center_x = left_margin / 2
         center_y = (rows - 1 - y) * cell_size + cell_size / 2
 
-        canvas.create_text(
-            center_x,
-            center_y,
-            text=str(y),
-            font=("Arial", 10),
-            fill="black"
-        )
+        canvas.create_text(center_x, center_y, text=str(y), font=("Arial", 10), fill="black")
 
     # Create a Drone instance
-    drone_1 = Drone(0, 0, rows, cols)
+    drone_1 = Drone(start_x, start_y, rows, cols)
 
     # calculate the drones position
     center_x = left_margin + drone_1.x * cell_size + cell_size / 2

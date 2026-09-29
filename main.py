@@ -2,13 +2,16 @@ import tkinter as tk
 import random
 import time
 from grid import create_grid
-from search_algorithms import lawnmower_path, spiral_path
+from search_algorithms import lawnmower_path, spiral_path_inwards, spiral_path_from_point, shortest_path
 
 # Default grid size
 rows = 10
 cols = 10
 # Default speed (milliseconds between moves)
 speed = 200 
+# Drone starting point var
+start_x = 0
+start_y = 0
 # Simulation data variables
 grid_size = (rows, cols)
 target = (0,0)
@@ -20,17 +23,30 @@ steps = 0
 
 def run_simulation():
     # Create the random goal point
-    global goal_x, goal_y, path, path_index, after_id, canvas, drone, target, grid_size, start_time, end_time, target_found, steps, elapsed_time
+    global goal_x, goal_y, path, path_index, after_id, canvas, drone, target, grid_size, start_time, end_time, target_found, steps, elapsed_time, start_x, start_y
+    start_x = int(start_x_var.get())
+    start_y = int(start_y_var.get())
     goal_x = random.randint(0, cols - 1)
     goal_y = random.randint(0, rows - 1)
     target = (goal_x, goal_y)
     grid_size = (rows, cols)
+ 
 
     # Determine the search pattern based on user selection
     if search_pattern_var.get() == "Lawnmower":
-        path = lawnmower_path(rows, cols)
+        search_path = lawnmower_path(rows, cols)
     elif search_pattern_var.get() == "Spiral":
-        path = spiral_path(rows, cols)
+        search_path = spiral_path_inwards(rows, cols)
+    elif search_pattern_var.get() == "Spiral from Point":
+        search_path = spiral_path_from_point(rows, cols, start_x, start_y)
+
+    path = [search_path[0]]
+    current_x, current_y = search_path[0]
+
+    for point in search_path[1:]:
+        next_path = shortest_path(current_x, current_y, point[0], point[1])
+        path.extend(next_path)
+        current_x, current_y = point
 
     path_index = 0
     after_id = None
@@ -39,7 +55,7 @@ def run_simulation():
     if canvas is not None:
         canvas.destroy()
 
-    canvas, drone = create_grid(grid_frame, goal_x, goal_y, rows, cols)
+    canvas, drone = create_grid(grid_frame, goal_x, goal_y, rows, cols, start_x, start_y)
     target_found = False
     end_time = 0.0
     start_time = time.perf_counter()
@@ -65,7 +81,7 @@ def reset_simulation():
     if canvas is not None:
         canvas.destroy()
 
-    canvas, drone = create_grid(grid_frame, rows=rows, cols=cols)
+    canvas, drone = create_grid(grid_frame, rows=rows, cols=cols, start_x=start_x, start_y=start_y)
     grid_size_label.config(text=f"Grid Size: {rows} x {cols}")
     target_label.config(text="Target: None")
     steps_label.config(text="Steps: 0")
@@ -104,7 +120,6 @@ def move_drone():
     
     after_id = root.after(speed, move_drone)
 
-
 def apply_grid_size():
     global rows, cols
 
@@ -129,6 +144,20 @@ def apply_speed():
         if new_speed > 0:
             speed = new_speed
 
+    except ValueError:
+        pass
+
+def apply_starting_point():
+    global start_x, start_y
+
+    try:
+        new_start_x = int(start_x_var.get())
+        new_start_y = int(start_y_var.get())
+
+        if 0 <= new_start_x < cols and 0 <= new_start_y < rows:
+            start_x = new_start_x
+            start_y = new_start_y
+            reset_simulation()
     except ValueError:
         pass
 
@@ -180,7 +209,7 @@ tk.Label(pattern_frame, text="Search Pattern:").grid(row=0, column=0, padx=5, pa
 
 search_pattern_var = tk.StringVar(value="Lawnmower")
 
-pattern_menu = tk.OptionMenu(pattern_frame, search_pattern_var, "Lawnmower", "Spiral")
+pattern_menu = tk.OptionMenu(pattern_frame, search_pattern_var, "Lawnmower", "Spiral", "Spiral from Point")
 pattern_menu.grid(row=0, column=1, padx=2, pady=2)
 
 # Grid size input
@@ -202,6 +231,18 @@ tk.Label(pattern_frame, text="Speed (ms):").grid(row=2, column=0, padx=2, pady=2
 speed_var = tk.StringVar(value="200")
 speed_entry = tk.Entry(pattern_frame, textvariable=speed_var, width=4)
 speed_entry.grid(row=2, column=1, padx=2, pady=2)
+
+# Starting point input
+tk.Label(pattern_frame, text="Starting Point (x,y):").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+
+start_x_var = tk.StringVar(value="0")
+start_x_entry = tk.Entry(pattern_frame, textvariable=start_x_var, width=4)
+start_x_entry.grid(row=3, column=1, padx=(2,1), pady=5)
+tk.Label(pattern_frame, text=",").grid(row=3, column=2, padx=1)
+
+start_y_var = tk.StringVar(value="0")
+start_y_entry = tk.Entry(pattern_frame, textvariable=start_y_var, width=4)
+start_y_entry.grid(row=3, column=3, padx=(1,2), pady=5)
 
 # Create legend to show which dot is drone, target, or obstacle
 legend_frame = tk.Frame(root)
@@ -235,9 +276,9 @@ run_button.pack(side=tk.LEFT, padx=5)
 reset_button = tk.Button(button_frame, text="Reset Simulation", command=reset_simulation)
 reset_button.pack(side=tk.LEFT, padx=5)
 
-# Create apply button for grid size and speed
-apply_button = tk.Button(pattern_frame, text="Apply", command=lambda: [apply_grid_size(), apply_speed()])
-apply_button.grid(row=3, column=0, columnspan=4, pady=(10,4))
+# Create apply button for grid size, speed, starting point
+apply_button = tk.Button(pattern_frame, text="Apply", command=lambda: [apply_grid_size(), apply_speed(), apply_starting_point()])
+apply_button.grid(row=4, column=0, columnspan=4, pady=(10,4))
 
 reset_simulation()
 root.mainloop()
