@@ -40,36 +40,36 @@ def spiral_path_inwards(rows, cols):
 
     return path
 
-def spiral_path_from_point(rows, cols, start_x, start_y):
-    # Outward spiral starting from a given point on grid
-    path = []
-    current_x = start_x
-    current_y = start_y
-    path.append((current_x, current_y))
 
-    directions = [(1, 0), (0, -1), (-1, 0), (0, 1)]  # right down left up
-    direction_index = 0
+def spiral_path_outwards(rows, cols):
+    start_x = (cols - 1) // 2
+    start_y = (rows - 1) // 2
+    path = [(start_x, start_y)]
+    visited = {(start_x, start_y)}
+
+    directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+    x, y = start_x, start_y
     steps_to_move = 1
+    direction_index = 0
 
     while len(path) < rows * cols:
         for i in range(2):
+            dx, dy = directions[direction_index]
+
             for j in range(steps_to_move):
-                current_x += directions[direction_index][0]
-                current_y += directions[direction_index][1]
+                x += dx
+                y += dy
 
-                if 0 <= current_x < cols and 0 <= current_y < rows:
-                    if (current_x, current_y) not in path:
-                        path.append((current_x, current_y))
-
-                if len(path) >= rows * cols:
-                    return path
+                if 0 <= x < cols and 0 <= y < rows and (x, y) not in visited:
+                    path.append((x, y))
+                    visited.add((x, y))
 
             direction_index = (direction_index + 1) % 4
 
         steps_to_move += 1
 
     return path
-    
+
 def shortest_path(start_x, start_y, goal_x, goal_y):
     # Simple straight-line pathfinding (not optimal for obstacles)
     path = []
@@ -96,14 +96,14 @@ def region_search_path(pattern, rows, start_col, end_col, start_x=None, start_y=
 
     if pattern == "Lawnmower":
         path = lawnmower_path(rows, region_cols)
-    elif pattern == "Spiral":
+    elif pattern == "Spiral inwards":
         path = spiral_path_inwards(rows, region_cols)
-    elif pattern == "Spiral from Point":
+    elif pattern == "Spiral outwards":
         local_start_x = start_x - start_col
         local_start_x = max(0, min(local_start_x, region_cols - 1))
         local_start_y = max(0, min(start_y, rows - 1))
 
-        path = spiral_path_from_point(rows, region_cols, local_start_x, local_start_y)
+        path = spiral_path_outwards(rows, region_cols)
     else:
         raise ValueError(f"Unknown search pattern: {pattern}")
     return [(x + start_col, y) for x, y in path]
