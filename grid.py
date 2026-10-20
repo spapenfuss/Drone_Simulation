@@ -2,7 +2,7 @@ import tkinter as tk
 from drone import Drone
 
 
-def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10, start_x = 0, start_y = 0):
+def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10, drone_positions=None):
     cell_size = 25  # size of each cell in pixels
 
     # space for axis labels
@@ -11,9 +11,9 @@ def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10, start_
 
     canvas = tk.Canvas(
         root,
-        width=cols * cell_size + left_margin,
-        height=rows * cell_size + bottom_margin,
-        bg="white"
+        width= cols * cell_size + left_margin,
+        height= rows * cell_size + bottom_margin,
+        bg= "white"
     )
     canvas.pack()
 
@@ -44,32 +44,38 @@ def create_grid(root, goal_x = None, goal_y = None, rows = 10, cols = 10, start_
 
         canvas.create_text(center_x, center_y, text=str(y), font=("Arial", 10), fill="black")
 
-    # Create a Drone instance
-    drone_1 = Drone(start_x, start_y, rows, cols)
+    # Default to one drone at (0, 0)
+    if drone_positions is None:
+        drone_positions = [(0, 0)]
+    
+    drone_ids = []
+    drone_colors = ["blue", "purple", "orange", "green"]  # Different colors for different drones
 
-    # calculate the drones position
-    center_x = left_margin + drone_1.x * cell_size + cell_size / 2
-    center_y = (rows - 1 - drone_1.y) * cell_size + cell_size / 2
+    # Draw each drone
+    for i, (start_x, start_y) in enumerate(drone_positions):
+        drone_object = Drone(start_x, start_y, rows, cols)
+        center_x = left_margin + drone_object.x * cell_size + cell_size / 2
+        center_y = (rows - 1 - drone_object.y) * cell_size + cell_size / 2
+        radius = 6
 
-    # draw the drone
-    radius = 6
-
-    drone = canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, fill="blue")
-
-    # calculate the goal position
+        color = drone_colors[i % len(drone_colors)]
+        drone_id = canvas.create_oval(
+            center_x - radius, center_y - radius,
+            center_x + radius, center_y + radius,
+            fill=color
+        )
+        drone_ids.append(drone_id)
+    
+    # Draw the goal if provided
     if goal_x is not None and goal_y is not None:
         goal_center_x = left_margin + goal_x * cell_size + cell_size / 2
         goal_center_y = (rows - 1 - goal_y) * cell_size + cell_size / 2
-
-        # draw the goal
         goal_radius = 7
 
         canvas.create_oval(
-            goal_center_x - goal_radius,
-            goal_center_y - goal_radius,
-            goal_center_x + goal_radius,
-            goal_center_y + goal_radius,
+            goal_center_x - goal_radius, goal_center_y - goal_radius,
+            goal_center_x + goal_radius, goal_center_y + goal_radius,
             fill="red"
         )
-
-    return canvas, drone
+    
+    return canvas, drone_ids

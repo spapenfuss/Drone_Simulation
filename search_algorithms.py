@@ -90,3 +90,20 @@ def shortest_path(start_x, start_y, goal_x, goal_y):
         path.append((current_x, current_y))
 
     return path
+
+def region_search_path(pattern, rows, start_col, end_col, start_x=None, start_y=0):
+    region_cols = end_col - start_col + 1
+
+    if pattern == "Lawnmower":
+        path = lawnmower_path(rows, region_cols)
+    elif pattern == "Spiral":
+        path = spiral_path_inwards(rows, region_cols)
+    elif pattern == "Spiral from Point":
+        local_start_x = start_x - start_col
+        local_start_x = max(0, min(local_start_x, region_cols - 1))
+        local_start_y = max(0, min(start_y, rows - 1))
+
+        path = spiral_path_from_point(rows, region_cols, local_start_x, local_start_y)
+    else:
+        raise ValueError(f"Unknown search pattern: {pattern}")
+    return [(x + start_col, y) for x, y in path]
